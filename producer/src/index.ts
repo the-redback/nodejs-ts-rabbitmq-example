@@ -48,8 +48,6 @@ app.get('/send-msg', (req: express.Request, res: express.Response) => {
 
   producer(JSON.stringify(data));
 
-  //   sendData(data);
-
   console.log('A message is sent to queue');
   res.send('Message Sent');
 });
