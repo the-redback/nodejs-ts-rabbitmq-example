@@ -19,15 +19,16 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: |
-          cd ${{ matrix.path }}
-          pwd
-          ls -la
       - run: pwd
+        working-directory: ${{ env.working-directory }}
       - run: ls -la
+        working-directory: ${{ env.working-directory }}
       - run: yarn --frozen-lockfile
+        working-directory: ${{ env.working-directory }}
       - run: yarn build
+        working-directory: ${{ env.working-directory }}
       - run: yarn lint
+        working-directory: ${{ env.working-directory }}
       # - run: yarn test
       # - name: Upload coverage reports to Codecov
       # uses: codecov/codecov-action@v3
