@@ -19,6 +19,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: cd ${{ matrix.path }}
+      - run: pwd
+      - run: ls -la
       - run: yarn --frozen-lockfile
       - run: yarn build
       - run: yarn lint
