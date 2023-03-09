@@ -1,4 +1,4 @@
-// import bodyParser from 'body-parser';
+import * as bodyParser from 'body-parser';
 import * as express from 'express';
 
 import createMQProducer from './producer';
@@ -10,11 +10,16 @@ const QUEUE_NAME = process.env.QUEUE_NAME || 'test-queue';
 const app = express();
 const producer = createMQProducer(AMQP_URL, QUEUE_NAME);
 
-// app.use(bodyParser.json());
+app.use(bodyParser.json());
 
 app.post('/register', (req: express.Request, res: express.Response) => {
   const {email, password} = req.body;
   console.log('Registering user...');
+  const msg = {
+    action: 'REGISTER',
+    data: {email, password},
+  };
+  producer(JSON.stringify(msg));
 
   return res.send('OK');
 });
@@ -22,6 +27,11 @@ app.post('/register', (req: express.Request, res: express.Response) => {
 app.post('/login', (req: express.Request, res: express.Response) => {
   const {email, password} = req.body;
   console.log('Login user...');
+  const msg = {
+    action: 'LOGIN',
+    data: {email, password},
+  };
+  producer(JSON.stringify(msg));
 
   return res.send('OK');
 });
@@ -33,7 +43,7 @@ app.get('/', (req: express.Request, res: express.Response) => {
 app.get('/send-msg', (req: express.Request, res: express.Response) => {
   const data = {
     msg: 'Hello from the other side!!',
-    time: Date.now(),
+    time: Date().toString(),
   };
 
   producer(JSON.stringify(data));

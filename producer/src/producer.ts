@@ -1,7 +1,7 @@
 import * as amqp from 'amqplib/callback_api';
 
 const createMQProducer = (amqpUrl: string, queueName: string) => {
-  console.log('Connecting to RabbitMQ...', amqpUrl);
+  console.log('Connecting to RabbitMQ...');
   let ch: any;
   amqp.connect(amqpUrl, (errorConnect: Error, connection: amqp.Connection) => {
     if (errorConnect) {
