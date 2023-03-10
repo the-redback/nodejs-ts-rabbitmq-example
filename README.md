@@ -6,6 +6,23 @@
 ![code size][code-size-image]
 <!-- [![codecov][codecov-image]][codecov-url] -->
 
+## Run RabbitMQ in docker
+
+```bash
+docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.9-management
+```
+
+## To test
+
+```bash
+curl -X POST localhost:3000/login -H 'Content-Type: application/json' -d '{"username":"user","password":"my_password"}'
+```
+
+```bash
+curl localhost:3000/send-msg'
+```
+
+
 ## `yarn` or `yarn install`
 
 Installs all the dependencies
