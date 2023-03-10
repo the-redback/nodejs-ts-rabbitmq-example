@@ -49,9 +49,7 @@ function WorkerConsumer(queueName: string) {
   consumeMsg(queueName, (msg: string) => {
     const secs = msg.split('.').length - 1;
 
-    console.log(' [x] Received %s', msg.toString());
     console.log(' [x] Starting task');
-
     setTimeout(() => {
       console.log(' [x] Done');
     }, secs * 1000);
