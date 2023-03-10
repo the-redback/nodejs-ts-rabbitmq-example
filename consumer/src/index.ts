@@ -8,8 +8,6 @@ const SIMPLE_QUEUE = 'test-queue';
 const WORKER_QUEUE = 'wait-and-work';
 
 const app = express();
-// const consumer = createMQWorker(AMQP_URL, 'test-queue', () => true);
-// const workers = createMQWorker(AMQP_URL, 'wait-and-work', (msg: string) => {});
 
 ensureQueue(SIMPLE_QUEUE);
 ensureQueue(WORKER_QUEUE);

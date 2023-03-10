@@ -33,7 +33,6 @@ async function consumeMsg(queueName: string, callback: Function) {
       console.log(' [x] Received %s', parsedMsg);
 
       if (typeof callback !== 'undefined') {
-        console.log('Executing tasks!');
         callback(parsedMsg);
       }
     },
@@ -51,6 +50,8 @@ function WorkerConsumer(queueName: string) {
     const secs = msg.split('.').length - 1;
 
     console.log(' [x] Received %s', msg.toString());
+    console.log(' [x] Starting task');
+
     setTimeout(() => {
       console.log(' [x] Done');
     }, secs * 1000);

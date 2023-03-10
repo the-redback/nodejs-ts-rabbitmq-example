@@ -1,28 +1,28 @@
-import * as amqp from 'amqplib/callback_api';
+import * as amqp from 'amqplib';
 
-const createMQProducer = (amqpUrl: string) => {
-  console.log('Connecting to RabbitMQ...');
-  let ch: any;
-  amqp.connect(amqpUrl, (errorConnect: Error, connection: amqp.Connection) => {
-    if (errorConnect) {
-      console.log('Error connecting to RabbitMQ: ', errorConnect);
-      return;
-    }
+let connection: amqp.Connection;
+let channel: amqp.Channel;
 
-    connection.createChannel((errorChannel, channel) => {
-      if (errorChannel) {
-        console.log('Error creating channel: ', errorChannel);
-        return;
-      }
+async function ensureConnection() {
+  if (!connection) {
+    connection = await amqp.connect('amqp://localhost:5672');
+  }
+  if (!channel) {
+    channel = await connection.createChannel();
+    console.log('Connected to RabbitMQ');
+  }
+}
 
-      ch = channel;
-      console.log('Connected to RabbitMQ');
-    });
-  });
-  return (msg: string,  queueName: string) => {
-    console.log('Produce message to RabbitMQ...');
-    ch.sendToQueue(queueName, Buffer.from(msg));
-  };
-};
+async function ensureQueue(queueName: string) {
+  if (!connection || !channel) {
+    await ensureConnection();
+  }
+  await channel.assertQueue(queueName, {durable: true});
+}
 
-export default createMQProducer;
+async function sendMsg(queueName: string, msg: string) {
+  console.log('Produce message to RabbitMQ...');
+  channel.sendToQueue(queueName, Buffer.from(msg));
+}
+
+export {ensureQueue, sendMsg};
