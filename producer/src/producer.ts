@@ -22,7 +22,7 @@ async function ensureQueue(queueName: string) {
 
 async function sendMsg(queueName: string, msg: string) {
   console.log('Produce message to RabbitMQ...');
-  channel.sendToQueue(queueName, Buffer.from(msg));
+  channel.sendToQueue(queueName, Buffer.from(msg), {persistent: true});
 }
 
 export {ensureQueue, sendMsg};

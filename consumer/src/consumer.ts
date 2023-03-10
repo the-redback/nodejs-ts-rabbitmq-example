@@ -10,6 +10,10 @@ async function ensureConnection() {
   if (!channel) {
     channel = await connection.createChannel();
     console.log('Connected to RabbitMQ');
+
+    // worker will get new task sequentially only after ack-ing previous on
+    // Use depending on use case
+    // channel.prefetch(1);
   }
 }
 
@@ -30,28 +34,33 @@ async function consumeMsg(queueName: string, callback: Function) {
         return;
       }
       parsedMsg = JSON.parse(msg.content.toString());
-      console.log(' [x] Received %s', parsedMsg);
 
-      if (typeof callback !== 'undefined') {
-        callback(parsedMsg);
+      if (typeof callback === 'function') {
+        callback(parsedMsg, () => channel.ack(msg)); // ack as callback of callback function
       }
     },
-    {noAck: true}
+    {noAck: false}
   );
   return parsedMsg;
 }
 
 async function SimpleConsumer(queueName: string) {
-  consumeMsg(queueName, () => true);
+  consumeMsg(queueName, (msg: string, ack_cb: Function) => {
+    console.log(' [x] Received %s', msg);
+    ack_cb(); // callback for acknowledging value
+  });
 }
 
 function WorkerConsumer(queueName: string) {
-  consumeMsg(queueName, (msg: string) => {
+  consumeMsg(queueName, (msg: string, ack_cb: Function) => {
+    console.log(' [x] Received %s', msg);
+
     const secs = msg.split('.').length - 1;
 
     console.log(' [x] Starting task');
     setTimeout(() => {
       console.log(' [x] Done');
+      ack_cb();
     }, secs * 1000);
   });
 }
