@@ -1,75 +1,60 @@
-import * as amqp from 'amqplib/callback_api';
+import * as amqp from 'amqplib';
 
-const createMQConsumer = (amqpURl: string, queueName: string) => {
-  console.log('Connecting to RabbitMQ...');
-  return () => {
-    amqp.connect(amqpURl, (errConn, conn) => {
-      if (errConn) {
-        throw errConn;
+let connection: amqp.Connection;
+let channel: amqp.Channel;
+
+async function ensureConnection() {
+  if (!connection) {
+    connection = await amqp.connect('amqp://localhost:5672');
+  }
+  if (!channel) {
+    channel = await connection.createChannel();
+    console.log('Connected to RabbitMQ');
+  }
+}
+
+async function ensureQueue(queueName: string) {
+  if (!connection || !channel) {
+    await ensureConnection();
+  }
+  await channel.assertQueue(queueName, {durable: true});
+}
+
+async function consumeMsg(queueName: string, callback: Function) {
+  await ensureQueue(queueName);
+  let parsedMsg: string | undefined;
+  channel.consume(
+    queueName,
+    (msg: amqp.Message | null) => {
+      if (!msg) {
+        return;
       }
+      parsedMsg = JSON.parse(msg.content.toString());
+      console.log(' [x] Received %s', parsedMsg);
 
-      conn.createChannel((errChan, chan) => {
-        if (errChan) {
-          throw errChan;
-        }
-
-        console.log('Connected to RabbitMQ');
-        chan.assertQueue(queueName, {durable: true});
-        chan.consume(
-          queueName,
-          (msg: amqp.Message | null) => {
-            if (msg) {
-              const parsedMsg = JSON.parse(msg.content.toString());
-              console.log('Received MSG: ', parsedMsg);
-            }
-          },
-          {noAck: true}
-        );
-      });
-    });
-  };
-};
-
-const createMQWorker = (
-  amqpURl: string,
-  queueName: string,
-  callback: Function
-) => {
-  console.log('Connecting to RabbitMQ...');
-  return () => {
-    amqp.connect(amqpURl, (errConn, conn) => {
-      if (errConn) {
-        throw errConn;
+      if (typeof callback !== 'undefined') {
+        console.log('Executing tasks!');
+        callback(parsedMsg);
       }
+    },
+    {noAck: true}
+  );
+  return parsedMsg;
+}
 
-      conn.createChannel((errChan, chan) => {
-        if (errChan) {
-          throw errChan;
-        }
+async function SimpleConsumer(queueName: string) {
+  consumeMsg(queueName, () => true);
+}
 
-        console.log('Connected to RabbitMQ');
-        chan.assertQueue(queueName, {durable: true});
-        chan.consume(
-          queueName,
-          (msg: amqp.Message | null) => {
-            if (msg) {
-              const parsedMsg = JSON.parse(msg.content.toString());
-              console.log('Received MSG: ', parsedMsg);
-              if (typeof callback !== 'undefined') {
-                console.log('Executing tasks!!!');
-                callback(parsedMsg);
-              } else {
-                console.log('No task found!');
-              }
-            }
-          },
-          {noAck: true}
-        );
-      });
-    });
-  };
-};
+function WorkerConsumer(queueName: string) {
+  consumeMsg(queueName, (msg: string) => {
+    const secs = msg.split('.').length - 1;
 
-export default createMQWorker;
-// export default createMQConsumer;
-// export createMQWorker;
+    console.log(' [x] Received %s', msg.toString());
+    setTimeout(() => {
+      console.log(' [x] Done');
+    }, secs * 1000);
+  });
+}
+
+export {ensureQueue, SimpleConsumer, WorkerConsumer};

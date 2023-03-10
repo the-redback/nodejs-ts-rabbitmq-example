@@ -1,7 +1,6 @@
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
-
-import createMQWorker from './consumer';
+import {ensureQueue, SimpleConsumer, WorkerConsumer} from './consumer';
 
 const PORT = parseInt(String(process.env.PORT), 10) || 3001;
 const AMQP_URL = process.env.AMQP_URL || 'amqp://localhost:5672';
@@ -9,18 +8,14 @@ const SIMPLE_QUEUE = 'test-queue';
 const WORKER_QUEUE = 'wait-and-work';
 
 const app = express();
-const consumer = createMQWorker(AMQP_URL, 'test-queue', () => true);
-const workers = createMQWorker(AMQP_URL, 'wait-and-work', (msg: string) => {
-  const secs = msg.split('.').length - 1;
+// const consumer = createMQWorker(AMQP_URL, 'test-queue', () => true);
+// const workers = createMQWorker(AMQP_URL, 'wait-and-work', (msg: string) => {});
 
-  console.log(' [x] Received %s', msg.toString());
-  setTimeout(() => {
-    console.log(' [x] Done');
-  }, secs * 1000);
-});
+ensureQueue(SIMPLE_QUEUE);
+ensureQueue(WORKER_QUEUE);
 
-consumer();
-workers();
+SimpleConsumer(SIMPLE_QUEUE);
+WorkerConsumer(WORKER_QUEUE);
 
 app.use(bodyParser.json());
 

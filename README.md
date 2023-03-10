@@ -22,6 +22,10 @@ curl -X POST localhost:3000/login -H 'Content-Type: application/json' -d '{"user
 curl localhost:3000/send-msg'
 ```
 
+```bash
+curl -X POST localhost:3000/tasks -H 'Content-Type: application/json' -d '{"msg":"wait 3s....."}'
+```
+
 
 ## `yarn` or `yarn install`
 
