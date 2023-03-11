@@ -1,11 +1,12 @@
 import * as amqp from 'amqplib';
 
+const AMQP_URL = process.env.AMQP_URL || 'amqp://@localhost:5672';
 let connection: amqp.Connection;
 let channel: amqp.Channel;
 
 async function ensureConnection() {
   if (!connection) {
-    connection = await amqp.connect('amqp://localhost:5672');
+    connection = await amqp.connect(AMQP_URL);
   }
   if (!channel) {
     channel = await connection.createChannel();

@@ -4,7 +4,6 @@ import * as express from 'express';
 import {ensureQueue, sendMsg} from './producer';
 
 const PORT = parseInt(String(process.env.PORT), 10) || 3000;
-const AMQP_URL = process.env.AMQP_URL || 'amqp://localhost:5672';
 const SIMPLE_QUEUE = 'test-queue';
 const WORKER_QUEUE = 'wait-and-work';
 
