@@ -5,8 +5,8 @@ services:
     image: rabbitmq:3.8-management-alpine
     restart: on-failure
     # environment:
-      # - RABBITMQ_DEFAULT_USER=myuser
-      # - RABBITMQ_DEFAULT_PASS=mypassword
+    # - RABBITMQ_DEFAULT_USER=myuser
+    # - RABBITMQ_DEFAULT_PASS=mypassword
     ports:
       # AMQP protocol port
       - '5672:5672'
@@ -15,7 +15,12 @@ services:
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
-  
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 10s
+      retries: 3
+
   producer:
     restart: on-failure
     build: producer
@@ -26,24 +31,10 @@ services:
     depends_on:
       - rabbitmq3
 
-  consumer1:
+  consumer:
     restart: on-failure
     build: consumer
-    ports:
-      - '3001:3001'
     environment:
-      PORT: 3001
-      AMQP_URL: 'amqp://@rabbitmq3:5672'
-    depends_on:
-      - rabbitmq3
-
-  consumer2:
-    restart: on-failure
-    build: consumer
-    ports:
-      - '3002:3002'
-    environment:
-      PORT: 3002
       AMQP_URL: 'amqp://@rabbitmq3:5672'
     depends_on:
       - rabbitmq3

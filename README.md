@@ -6,6 +6,12 @@
 ![code size][code-size-image]
 <!-- [![codecov][codecov-image]][codecov-url] -->
 
+## Docker-Compose
+
+```bash
+docker-compose up --remove-orphans -d --scale consumer=5
+```
+
 ## Run RabbitMQ in docker
 
 ```bash
