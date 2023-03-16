@@ -13,7 +13,7 @@ async function ensureConnection() {
     channel = await connection.createChannel();
     console.log('Connected to RabbitMQ');
 
-    // worker will get new task sequentially only after ack-ing previous on
+    // worker will get new task sequentially only after ack-ing previous one
     // Use depending on use case
     // channel.prefetch(1);
   }
