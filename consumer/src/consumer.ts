@@ -14,7 +14,7 @@ async function ensureConnection() {
     console.log('Connected to RabbitMQ');
 
     // worker will get new task sequentially only after ack-ing previous one
-    // Use depending on use case
+    // Use depending on use case.
     // channel.prefetch(1);
   }
 }
